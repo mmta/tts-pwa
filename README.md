@@ -2,7 +2,7 @@
 
 A simple Progressive Web App (PWA) for text-to-speech (TTS) with voice selection, built based on [zuix-html-pwa](https://github.com/zuixjs/zuix-html-pwa) template.
 
-Installable version is available from [here](https://mmta.github.io/<your-repo>/).
+Installable version is available from [here](https://mmta.github.io/tts-pwa/).
 
 ## Usage
 
