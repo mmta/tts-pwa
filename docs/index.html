@@ -50,7 +50,10 @@
     <div class="tts-controls">
       <label for="voiceSelect">Choose a voice:</label>
       <select id="voiceSelect"></select>
-      <button onclick="speak()">Speak</button>
+      <div style="display: flex; gap: 12px; width: 100%; justify-content: center;">
+        <button onclick="speak()">Speak</button>
+        <button onclick="stopSpeech()" style="background: #d32f2f;">Stop</button>
+      </div>
     </div>
   </main>
 
@@ -78,17 +81,20 @@
       voiceSelect.selectedIndex = defaultIndex;
     }
 
+
     function speak() {
       const text = document.getElementById("text").value;
       const selectedIndex = document.getElementById("voiceSelect").value;
       const utterance = new SpeechSynthesisUtterance(text);
-
       utterance.voice = voices[selectedIndex];
       utterance.rate = 1;
       utterance.pitch = 1;
       utterance.volume = 1;
-
       window.speechSynthesis.speak(utterance);
+    }
+
+    function stopSpeech() {
+      window.speechSynthesis.cancel();
     }
 
     // Load voices asynchronously
