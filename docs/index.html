@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>Text-to-Speech</title>
+  <meta name="description" content="Text-to-Speech PWA">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Disable tap highlight on IE -->
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- Progressive Web App -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" sizes="192x192" href="images/icons/192x192.png">
+  <link rel="icon" sizes="512x512" href="images/icons/512x512.png">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Text-to-Speech PWA">
+
+  <!-- Tile color for Windows -->
+  <meta name="msapplication-TileImage" content="images/icons/152x152.png">
+  <meta name="msapplication-TileColor" content="#ffc40d">
+
+  <!-- Place favicon.ico in the root directory -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.ico">
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="index.css">
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then((reg) => console.log("PWA service-worker ready.", reg))
+        .catch((err) => console.error("Could not load service-worker.", err));
+    }
+  </script>
+</head>
+<body>
+
+  <main class="tts-container">
+    <h2>Text-to-Speech with Voice Selection</h2>
+  <textarea id="text" rows="40" cols="80" placeholder="Type or paste text here to convert to speech..."></textarea>
+    <div class="tts-controls">
+      <label for="voiceSelect">Choose a voice:</label>
+      <select id="voiceSelect"></select>
+      <button onclick="speak()">Speak</button>
+    </div>
+  </main>
+
+  <script>
+    let voices = [];
+
+    function populateVoiceList() {
+      voices = window.speechSynthesis.getVoices();
+      const voiceSelect = document.getElementById("voiceSelect");
+      voiceSelect.innerHTML = "";
+
+      let defaultIndex = 0;
+      voices.forEach((voice, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = `${voice.name} (${voice.lang})${voice.default ? " — DEFAULT" : ""}`;
+        if (
+          voice.name === "Google UK English Male" &&
+          voice.lang === "en-GB"
+        ) {
+          defaultIndex = index;
+        }
+        voiceSelect.appendChild(option);
+      });
+      voiceSelect.selectedIndex = defaultIndex;
+    }
+
+    function speak() {
+      const text = document.getElementById("text").value;
+      const selectedIndex = document.getElementById("voiceSelect").value;
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      utterance.voice = voices[selectedIndex];
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Load voices asynchronously
+    window.speechSynthesis.onvoiceschanged = populateVoiceList;
+    populateVoiceList(); // Call initially in case voices are already loaded
+  </script>
+
+
+<noscript>
+  Turn on JavaScript to access this site content.
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "tts-pwa",
+  "version": "1.0.0",
+  "description": "Text-to-Speech PWA",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server --cors ./docs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.0"
+  }
+}
