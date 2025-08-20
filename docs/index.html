@@ -35,6 +35,22 @@
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="index.css">
   <script>
+    // Wake Lock API support
+    let wakeLock = null;
+    async function requestWakeLock() {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        // Wake Lock not supported or denied
+        console.warn('Wake Lock not available:', err);
+      }
+    }
+    function releaseWakeLock() {
+      if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+      }
+    }
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js")
         .then((reg) => console.log("PWA service-worker ready.", reg))
@@ -90,11 +106,16 @@
       utterance.rate = 1;
       utterance.pitch = 1;
       utterance.volume = 1;
+      // Request wake lock when speaking starts
+      requestWakeLock();
+      utterance.onend = releaseWakeLock;
+      utterance.onerror = releaseWakeLock;
       window.speechSynthesis.speak(utterance);
     }
 
     function stopSpeech() {
       window.speechSynthesis.cancel();
+      releaseWakeLock();
     }
 
     // Load voices asynchronously
