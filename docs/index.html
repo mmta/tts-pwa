@@ -98,23 +98,61 @@
     }
 
 
+    // Helper to split text into chunks (by sentence, max 200 chars per chunk)
+    function splitTextToChunks(text, maxLen = 200) {
+      const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+      const chunks = [];
+      let current = '';
+      for (const sentence of sentences) {
+        if ((current + sentence).length > maxLen && current.length > 0) {
+          chunks.push(current);
+          current = '';
+        }
+        current += sentence;
+      }
+      if (current.length > 0) chunks.push(current);
+      return chunks;
+    }
+
+    let chunkQueue = [];
+    let isSpeakingChunks = false;
+
     function speak() {
       const text = document.getElementById("text").value;
       const selectedIndex = document.getElementById("voiceSelect").value;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = voices[selectedIndex];
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      utterance.onend = releaseWakeLock;
-      utterance.onerror = releaseWakeLock;
-      window.speechSynthesis.speak(utterance);
+      chunkQueue = splitTextToChunks(text, 200);
+      isSpeakingChunks = true;
+      speakNextChunk(selectedIndex);
       if ('wakeLock' in navigator) {
         requestWakeLock();
       }
     }
 
+    function speakNextChunk(selectedIndex) {
+      if (!isSpeakingChunks || chunkQueue.length === 0) {
+        releaseWakeLock();
+        isSpeakingChunks = false;
+        return;
+      }
+      const chunk = chunkQueue.shift();
+      const utterance = new SpeechSynthesisUtterance(chunk);
+      utterance.voice = voices[selectedIndex];
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      utterance.onend = function() {
+        speakNextChunk(selectedIndex);
+      };
+      utterance.onerror = function() {
+        releaseWakeLock();
+        isSpeakingChunks = false;
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
     function stopSpeech() {
+      isSpeakingChunks = false;
+      chunkQueue = [];
       window.speechSynthesis.cancel();
       releaseWakeLock();
     }
